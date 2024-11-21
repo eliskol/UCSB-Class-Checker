@@ -1,8 +1,10 @@
 import requests
 import copy
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
+API_KEY = os.getenv("API_KEY")
 
 def get_data(url, headers=None, params=None):
     try:
@@ -17,11 +19,11 @@ def process_data(data):
     sections = []
     for cl in data["classes"]:
         sections.extend(cl["classSections"])
-    
+
     times = []
     for sec in sections:
         times.extend(sec["timeLocations"])
-    
+
     return times
 
 def add_rooms(times, buildings):
@@ -62,12 +64,12 @@ def main():
         data2 = get_data(url, headers=headers, params=params)
         data["classes"].extend(data2["classes"])
         total -= 500
-    
+
     times = process_data(data)
     buildings = set([time["building"] for time in times])
 
     #remove fake buildings
-    buildings = [b for b in buildings if b not in ["ON", "NO", "HARDR", "IV", None]]
+    buildings = [b for b in buildings if b not in ["451", "570", "ON", "NO", "HARDR", "IV", None]]
 
     #add rooms
     rooms = add_rooms(times, buildings)
@@ -81,10 +83,9 @@ def main():
 # Example usage
 if __name__ == "__main__":
     final_times = main()
-    
+
     build = input("Enter building: ")
     day = input("Enter day: ")
 
     for room in sorted(list(final_times[build])):
         print(room, final_times[build][room][day])
-
